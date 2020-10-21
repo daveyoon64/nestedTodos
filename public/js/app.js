@@ -1,5 +1,7 @@
 'use strict';
 
+const e = require("express");
+
 var ENTER_KEY = 13;
 var ESCAPE_KEY = 27;
 var filter = "";
@@ -48,7 +50,7 @@ function init() {
       filter = DOMfilter;
       render();
     }.bind(this)
-  }).init('/all');   
+  }).init('/all');
 }
 function bindEvents() {
   var newTodoEvent = document.getElementById('new-todo');
@@ -99,7 +101,6 @@ function render() {
   var main = document.getElementById('main');
   var toggleAll = document.getElementById('toggle-all');
   var newTodo = document.getElementById('new-todo');
-  
 
   var todoHTMLTemplate = "";
   todos.forEach((todo) => {
@@ -114,6 +115,54 @@ function render() {
       </li>
     `;
     todoHTMLTemplate += tempString;
+    // Step 1: Rewrite tempString so a new todo be made programatically
+    // Step 2: Decide on how we're going to mark a todo as a child/has a parent
+    // Step 3: Update create (if necessary) to reflect the todo's parent
+    // Step 4: Back in render, make sure that if a todo is a child, you append it to it's parent (uuid?)
+    // Step 5: There's might be some work when deleting a child or a parent... hmmmm
+    todoList.innerHTML = '';
+    todos.forEach((todo) => {
+      var newLi = document.createElement('li');
+      if (todo.completed) {
+        newLi.setAttribute("class", "completed");
+      } else {
+        newLi.removeAttribute("class", "");
+      }
+      newLi.setAttribute("data-id", todo.id);  
+      // create the new div and append it to the li
+      var newDiv = document.createElement('div');
+      newDiv.setAttribute("class", "view");
+      newLi.append(newDiv);
+  
+      // new toggle checkbox
+      var newInput = document.createElement('input');
+      newInput.setAttribute("class", "toggle");
+      newInput.setAttribute("type", "checkbox");
+      if (todo.completed) {
+        newInput.setAttribute("checked", true);
+      } else {
+        newInput.removeAttribute("checked");
+      }
+      newDiv.append(newInput);
+  
+      // new label for title of todo
+      var newLabel = document.createElement('label');
+      newLabel.innerText = todo.title;
+      newDiv.append(newLabel);
+  
+      // new buttom for destroy
+      var newButton = document.createElement('button');
+      newButton.setAttribute("class", "destroy");
+      newDiv.append(newButton);
+  
+      // new input for editing
+      var newEditInput = document.createElement('input');
+      newEditInput.setAttribute("class", "edit");
+      newEditInput.setAttribute("value", todo.title);
+      newLi.append(newEditInput);
+      
+      todoList.append(newLi);
+    });
   });
   todoList.innerHTML = todoHTMLTemplate;
   
@@ -235,7 +284,7 @@ function update(e) {
   }
 
   if (el.dataset.abort) {
-    el.dataset.abord = false;
+    el.dataset.abort = false;
   } else {
     todos[indexFromEl(el)].title = val;
   }
