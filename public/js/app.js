@@ -115,7 +115,7 @@ function render() {
       </li>
     `;
     todoHTMLTemplate += tempString;
-    // Step 1: Rewrite tempString so a new todo be made programatically
+    // Step 1: Rewrite tempString so a new todo be made programatically DONE
     // Step 2: Decide on how we're going to mark a todo as a child/has a parent
     // Step 3: Update create (if necessary) to reflect the todo's parent
     // Step 4: Back in render, make sure that if a todo is a child, you append it to it's parent (uuid?)
@@ -150,6 +150,11 @@ function render() {
       newLabel.innerText = todo.title;
       newDiv.append(newLabel);
   
+      // new buttom for subtask
+      var newSubtaskButton = document.createElement('button');
+      newSubtaskButton.setAttribute("class", "addsubtask");
+      newDiv.append(newSubtaskButton);
+
       // new buttom for destroy
       var newButton = document.createElement('button');
       newButton.setAttribute("class", "destroy");
