@@ -1,7 +1,5 @@
 'use strict';
 
-const e = require("express");
-
 var ENTER_KEY = 13;
 var ESCAPE_KEY = 27;
 var filter = "";
