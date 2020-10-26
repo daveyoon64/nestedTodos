@@ -4,6 +4,10 @@ body {
 	padding: 0;
 }
 
+div {
+	width: 1000px;
+}
+
 button {
 	margin: 0;
 	padding: 0;
@@ -47,6 +51,7 @@ input[type="checkbox"] {
 #todoapp {
 	background: #fff;
 	margin: 130px 0 40px 0;
+	width: fit-content(1000px);
 	position: relative;
 	box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2),
 	            0 25px 50px 0 rgba(0, 0, 0, 0.1);
@@ -201,7 +206,7 @@ label[for='toggle-all'] {
 	white-space: pre-line;
 	word-break: break-all;
 	padding: 15px 60px 15px 15px;
-	margin-left: 45px;
+	margin-left: 30px;
 	display: block;
 	line-height: 1.2;
 	transition: color 0.4s;
