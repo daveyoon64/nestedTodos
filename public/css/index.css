@@ -242,15 +242,27 @@ label[for='toggle-all'] {
 	display: none;
 	position: absolute;
 	top: 0;
-	right: 50px;
+	right: 30px;
 	bottom: 0;
-	width: 40px;
+	width: 50px;
 	height: 40px;
 	margin: auto 0;
 	font-size: 30px;
 	color: #cc9a9a;
 	margin-bottom: 11px;
 	transition: color 0.2s ease-out;
+}
+
+#todo-list li .addsubtask:hover {
+	color: #af5b5e;
+}
+
+#todo-list li .addsubtask:after {
+	content: '+';
+}
+
+#todo-list li:hover .addsubtask {
+	display: block;
 }
 
 #todo-list li .edit {

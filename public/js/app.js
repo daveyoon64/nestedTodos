@@ -73,6 +73,7 @@ function bindEvents() {
     }
   });
   todoListEvent.addEventListener('dblclick', function(event) {
+    console.log(event);
     if (event.target && event.target.tagName === 'LABEL') {
       edit(event);
     }
@@ -80,6 +81,9 @@ function bindEvents() {
   todoListEvent.addEventListener('keyup', function(event) {
     if (event.target && event.target.className === 'edit') {
       editKeyup(event);
+    } else if (event.target && event.target.id === 'new-todo') { 
+      // ADDED FOR NEW SUBTASK FEATURE
+      addsubtask(event); 
     }
   });
   todoListEvent.addEventListener('focusout', function(event) {
@@ -92,6 +96,11 @@ function bindEvents() {
       destroy(event);
     }
   });
+  todoListEvent.addEventListener('click', function(event) {
+    if (event.target && event.target.className === 'addsubtask') {
+      addsubtaskUI(event);
+    }
+  });
 }
 function render() {
   var todos = getFilteredTodos();
@@ -100,74 +109,70 @@ function render() {
   var toggleAll = document.getElementById('toggle-all');
   var newTodo = document.getElementById('new-todo');
 
-  var todoHTMLTemplate = "";
+  // new elements for todo
+  todoList.innerHTML = "";
   todos.forEach((todo) => {
-    var tempString = `
-      <li ${todo.completed ? `class="completed"` : ``}data-id="${todo.id}">
-        <div class="view">
-          <input class="toggle" type="checkbox" ${todo.completed ? `checked` : ``}>
-          <label>${todo.title}</label>
-          <button class="destroy"></button>
-        </div>
-        <input class="edit" value="${todo.title}">
-      </li>
-    `;
-    todoHTMLTemplate += tempString;
-    // Step 1: Rewrite tempString so a new todo be made programatically DONE
-    // Step 2: Decide on how we're going to mark a todo as a child/has a parent
-    // Step 3: Update create (if necessary) to reflect the todo's parent
-    // Step 4: Back in render, make sure that if a todo is a child, you append it to it's parent (uuid?)
-    // Step 5: There's might be some work when deleting a child or a parent... hmmmm
-    todoList.innerHTML = '';
-    todos.forEach((todo) => {
-      var newLi = document.createElement('li');
-      if (todo.completed) {
-        newLi.setAttribute("class", "completed");
-      } else {
-        newLi.removeAttribute("class", "");
-      }
-      newLi.setAttribute("data-id", todo.id);  
-      // create the new div and append it to the li
-      var newDiv = document.createElement('div');
-      newDiv.setAttribute("class", "view");
-      newLi.append(newDiv);
-  
-      // new toggle checkbox
-      var newInput = document.createElement('input');
-      newInput.setAttribute("class", "toggle");
-      newInput.setAttribute("type", "checkbox");
-      if (todo.completed) {
-        newInput.setAttribute("checked", true);
-      } else {
-        newInput.removeAttribute("checked");
-      }
-      newDiv.append(newInput);
-  
-      // new label for title of todo
-      var newLabel = document.createElement('label');
-      newLabel.innerText = todo.title;
-      newDiv.append(newLabel);
-  
-      // new buttom for subtask
-      var newSubtaskButton = document.createElement('button');
-      newSubtaskButton.setAttribute("class", "addsubtask");
-      newDiv.append(newSubtaskButton);
+    var newLi = document.createElement('li');
+    if (todo.completed) {
+      newLi.setAttribute("class", "completed");
+    } else {
+      newLi.removeAttribute("class", "");
+    }
+    newLi.setAttribute("data-id", todo.id);  
+    // create the new div and append it to the li
+    var newDiv = document.createElement('div');
+    newDiv.setAttribute("class", "view");
+    newLi.append(newDiv);
 
-      // new buttom for destroy
-      var newButton = document.createElement('button');
-      newButton.setAttribute("class", "destroy");
-      newDiv.append(newButton);
-  
-      // new input for editing
-      var newEditInput = document.createElement('input');
-      newEditInput.setAttribute("class", "edit");
-      newEditInput.setAttribute("value", todo.title);
-      newLi.append(newEditInput);
-      
+    // new toggle checkbox
+    var newInput = document.createElement('input');
+    newInput.setAttribute("class", "toggle");
+    newInput.setAttribute("type", "checkbox");
+    if (todo.completed) {
+      newInput.setAttribute("checked", true);
+    } else {
+      newInput.removeAttribute("checked");
+    }
+    newDiv.append(newInput);
+
+    // new label for title of todo
+    var newLabel = document.createElement('label');
+    newLabel.innerText = todo.title;
+    newDiv.append(newLabel);
+
+    // new buttom for subtask
+    var newSubtaskButton = document.createElement('button');
+    newSubtaskButton.setAttribute("class", "addsubtask");
+    newDiv.append(newSubtaskButton);
+
+    // new button for destroy
+    var newButton = document.createElement('button');
+    newButton.setAttribute("class", "destroy");
+    newDiv.append(newButton);
+
+    // new unordered list nested todos
+    var newUl = document.createElement('ul');
+    newUl.setAttribute("class", "subtask");
+    //newEditInput.setAttribute("value", todo.title);
+    newDiv.append(newUl);
+
+    // new input for editing
+    var newEditInput = document.createElement('input');
+    newEditInput.setAttribute("class", "edit");
+    newEditInput.setAttribute("value", todo.title);
+    newLi.append(newEditInput);
+
+    // logic to choose where to add the subtask
+    if (todo.isSubtask === true) {
+      var el = document.querySelector(`[data-id="${todo.parent}"]`);
+      console.log(el);
+      var subtaskUL = el.childNodes[0].childNodes[4];
+      subtaskUL.appendChild(newLi);
+    } else {
       todoList.append(newLi);
-    });
+    }
+    
   });
-  todoList.innerHTML = todoHTMLTemplate;
   
   main.style.display = todos.length > 0 ? 'inline' : 'none';
   toggleAll.checked = getActiveTodos().length === 0 ? true : false;
@@ -202,6 +207,43 @@ function renderFooter() {
   footer.style.display = todoCount > 0 ? 'block' : 'none';
   footer.innerHTML = template;
 }
+
+
+function addsubtaskUI(e) {
+  // Creates the input box to enter your subtask
+  var subtaskUl = e.target.parentNode.childNodes[4];
+
+  // creating and configuring out subtask input field
+  var newInput = document.createElement('input');
+  newInput.innerText = 'new subtask info';
+  newInput.setAttribute("id", "new-todo");
+  newInput.setAttribute("placeholder", "enter subtask");
+  subtaskUl.appendChild(newInput);
+}
+
+function addsubtask(e) {
+  // addsubtask will find the nearest li and use data-id to id the parent
+  // TODO: can this be integrated into create?
+  var parentVal = e.target.closest('li');
+  var parentId = parentVal.getAttribute('data-id');
+  var val = e.target.value.trim();
+
+  if (e.which !== ENTER_KEY || !val) {
+    return;
+  }
+
+  todos.push({
+    id: uuid(),
+    title: val,
+    completed: false,
+    isSubtask: true,
+    parent: parentId,
+  });
+  // set input box to blank
+  e.target.value = '';
+  render();
+}
+
 function checkFilter(testFilter) {
   return testFilter === filter;
 }
@@ -210,7 +252,6 @@ function toggleAll(e) {
   todos.forEach(function (todo) {
     todo.completed = isChecked;
   });
-
   render();
 }
 function getActiveTodos() {
