@@ -4,10 +4,6 @@ body {
 	padding: 0;
 }
 
-div {
-	width: 1000px;
-}
-
 button {
 	margin: 0;
 	padding: 0;
@@ -185,8 +181,8 @@ label[for='toggle-all'] {
 	width: 40px;
 	/* auto, since non-WebKit browsers doesn't support input styling */
 	height: auto;
-	position: absolute;
-	top: 0;
+	position: relative;
+	top: 50px;
 	bottom: 0;
 	margin: auto 0;
 	border: none; /* Mobile Safari */
