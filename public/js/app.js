@@ -7,6 +7,19 @@ var todos = store('todos-jquery');
 var todoTemplateEl = document.getElementById('todo-template');
 var footerTemplateEl = document.getElementById('footer-template');
 
+// Bugs I've found
+// 1. You can press the add subtask button indefinitely
+// 2. Clicking a child to complete will not register in the "completed" filter
+//    - if parent todo, it only show the parent todo
+//    - this will also break the footer, highlighting
+//    1. Add two levels of subtasks
+//    2. Toggle the innermost child as complete
+//    3. Click on completed
+//    app.js:178 Uncaught TypeError: Cannot read property 'childNodes' of null
+// 3. Deleting a todo (besides parent) with a subtask will cause an error
+//    app.js:169 Uncaught TypeError: Cannot read property 'childNodes' of null at app.js:169
+//    if I refresh the page, it'll bring back all old entries
+
 //
 // utility functions
 // 
@@ -170,8 +183,7 @@ function render() {
       subtaskUL.appendChild(newLi);
     } else {
       todoList.append(newLi);
-    }
-    
+    } 
   });
   
   main.style.display = todos.length > 0 ? 'inline' : 'none';

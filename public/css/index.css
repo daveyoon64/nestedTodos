@@ -151,7 +151,7 @@ label[for='toggle-all'] {
 #todo-list li {
 	position: relative;
 	font-size: 24px;
-	border-bottom: 1px solid #ededed;
+	/* border-bottom: 1px solid #ededed; */
 	list-style-type: none;
 }
 
@@ -183,7 +183,7 @@ label[for='toggle-all'] {
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	margin: auto 0;
+	margin: 10px 0;
 	border: none; /* Mobile Safari */
 	-webkit-appearance: none;
 	appearance: none;
@@ -220,7 +220,7 @@ label[for='toggle-all'] {
 	bottom: 0;
 	width: 40px;
 	height: 40px;
-	margin: auto 0;
+	margin: 0 0;
 	font-size: 30px;
 	color: #cc9a9a;
 	margin-bottom: 11px;
@@ -247,7 +247,7 @@ label[for='toggle-all'] {
 	bottom: 0;
 	width: 50px;
 	height: 40px;
-	margin: auto 0;
+	margin: 0 0;
 	font-size: 30px;
 	color: #cc9a9a;
 	margin-bottom: 11px;
