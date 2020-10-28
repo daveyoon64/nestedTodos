@@ -9,6 +9,7 @@ var footerTemplateEl = document.getElementById('footer-template');
 
 // Bugs I've found
 // 1. You can press the add subtask button indefinitely
+//    - SOLVED
 // 2. Clicking a child to complete will not register in the "completed" filter
 //    - if parent todo, it only show the parent todo
 //    - this will also break the footer, highlighting
@@ -19,6 +20,7 @@ var footerTemplateEl = document.getElementById('footer-template');
 // 3. Deleting a todo (besides parent) with a subtask will cause an error
 //    app.js:169 Uncaught TypeError: Cannot read property 'childNodes' of null at app.js:169
 //    if I refresh the page, it'll bring back all old entries
+// 4. When I double-click to edit a todo, all child subtasks disappear
 
 //
 // utility functions
@@ -111,6 +113,7 @@ function bindEvents() {
   });
   todoListEvent.addEventListener('click', function(event) {
     if (event.target && event.target.className === 'addsubtask') {
+      // creates UI for creating a subtask
       addsubtaskUI(event);
     }
   });
@@ -178,7 +181,6 @@ function render() {
     // logic to choose where to add the subtask
     if (todo.isSubtask === true) {
       var el = document.querySelector(`[data-id="${todo.parent}"]`);
-      console.log(el);
       var subtaskUL = el.childNodes[0].childNodes[4];
       subtaskUL.appendChild(newLi);
     } else {
@@ -222,6 +224,17 @@ function renderFooter() {
 
 
 function addsubtaskUI(e) {
+  // Disables the + and x buttons while adding a subtask
+  // They will get recreated after addsubtask() runs render()
+  var subtaskButtonList = document.getElementsByClassName('addsubtask');
+  var destroyButtonList = document.getElementsByClassName('destroy');
+  for (var i = 0; i < subtaskButtonList.length; i++) {
+    subtaskButtonList[i].setAttribute("disabled", true);
+  }
+  for (var i = 0; i < destroyButtonList.length; i++) {
+    destroyButtonList[i].setAttribute("disabled", true);
+  }
+
   // Creates the input box to enter your subtask
   var subtaskUl = e.target.parentNode.childNodes[4];
 
@@ -240,6 +253,8 @@ function addsubtask(e) {
   var parentId = parentVal.getAttribute('data-id');
   var val = e.target.value.trim();
 
+  // If key other than ENTER is pressed, return
+  // This prevents a new subtask from being pushed onto todos
   if (e.which !== ENTER_KEY || !val) {
     return;
   }
