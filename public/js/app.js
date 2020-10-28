@@ -20,6 +20,13 @@ var footerTemplateEl = document.getElementById('footer-template');
 // 3. Deleting a todo (besides parent) with a subtask will cause an error
 //    app.js:169 Uncaught TypeError: Cannot read property 'childNodes' of null at app.js:169
 //    if I refresh the page, it'll bring back all old entries
+//    - the problem:
+//      - the problem is when TodoMVC tries to re-render the items, it'll try to render a li with subtask: True, but can't find the parent
+//      - the behavior I want: if no parent, child should be deleted, so when you get to 186, it'll try to treat it as a subtask
+//      - however, all three items are surviving... 
+//    - Solution
+//      - Delete is working, however, it gets to render and causes problems
+//      - I have to clean todos that are not connected to todo with no subtask
 // 4. When I double-click to edit a todo, all child subtasks disappear
 
 //
@@ -98,7 +105,7 @@ function bindEvents() {
       editKeyup(event);
     } else if (event.target && event.target.id === 'new-todo') { 
       // ADDED FOR NEW SUBTASK FEATURE
-      addsubtask(event); 
+      createsubtask(event); 
     }
   });
   todoListEvent.addEventListener('focusout', function(event) {
@@ -112,9 +119,9 @@ function bindEvents() {
     }
   });
   todoListEvent.addEventListener('click', function(event) {
-    if (event.target && event.target.className === 'addsubtask') {
+    if (event.target && event.target.className === 'createsubtask') {
       // creates UI for creating a subtask
-      addsubtaskUI(event);
+      createsubtaskUI(event);
     }
   });
 }
@@ -124,6 +131,8 @@ function render() {
   var main = document.getElementById('main');
   var toggleAll = document.getElementById('toggle-all');
   var newTodo = document.getElementById('new-todo');
+
+  // cleans todoList of todos with no 
 
   // new elements for todo
   todoList.innerHTML = "";
@@ -158,7 +167,7 @@ function render() {
 
     // new buttom for subtask
     var newSubtaskButton = document.createElement('button');
-    newSubtaskButton.setAttribute("class", "addsubtask");
+    newSubtaskButton.setAttribute("class", "createsubtask");
     newDiv.append(newSubtaskButton);
 
     // new button for destroy
@@ -223,10 +232,10 @@ function renderFooter() {
 }
 
 
-function addsubtaskUI(e) {
+function createsubtaskUI(e) {
   // Disables the + and x buttons while adding a subtask
-  // They will get recreated after addsubtask() runs render()
-  var subtaskButtonList = document.getElementsByClassName('addsubtask');
+  // They will get recreated after createsubtask() runs render()
+  var subtaskButtonList = document.getElementsByClassName('createsubtask');
   var destroyButtonList = document.getElementsByClassName('destroy');
   for (var i = 0; i < subtaskButtonList.length; i++) {
     subtaskButtonList[i].setAttribute("disabled", true);
@@ -246,8 +255,8 @@ function addsubtaskUI(e) {
   subtaskUl.appendChild(newInput);
 }
 
-function addsubtask(e) {
-  // addsubtask will find the nearest li and use data-id to id the parent
+function createsubtask(e) {
+  // createsubtask will find the nearest li and use data-id to id the parent
   // TODO: can this be integrated into create?
   var parentVal = e.target.closest('li');
   var parentId = parentVal.getAttribute('data-id');
@@ -318,7 +327,9 @@ function create(e) {
   todos.push({
     id: uuid(),
     title: val,
-    completed: false
+    completed: false,
+    isSubtask: false,
+    parent: null,
   });
   // set input box to blank
   input.value = '';
@@ -375,7 +386,9 @@ function indexFromEl(el) {
   }
 }
 function destroy(e) {
+  debugger;
   todos.splice(indexFromEl(e.target), 1);
+
   render();
 }
 

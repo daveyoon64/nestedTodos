@@ -239,7 +239,7 @@ label[for='toggle-all'] {
 	display: block;
 }
 
-#todo-list li .addsubtask {
+#todo-list li .createsubtask {
 	display: none;
 	position: absolute;
 	top: 0;
@@ -254,15 +254,15 @@ label[for='toggle-all'] {
 	transition: color 0.2s ease-out;
 }
 
-#todo-list li .addsubtask:hover {
+#todo-list li .createsubtask:hover {
 	color: #af5b5e;
 }
 
-#todo-list li .addsubtask:after {
+#todo-list li .createsubtask:after {
 	content: '+';
 }
 
-#todo-list li:hover .addsubtask {
+#todo-list li:hover .createsubtask {
 	display: block;
 }
 
