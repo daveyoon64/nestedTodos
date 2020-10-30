@@ -95,7 +95,6 @@ function bindEvents() {
     }
   });
   todoListEvent.addEventListener('dblclick', function(event) {
-    console.log(event);
     if (event.target && event.target.tagName === 'LABEL') {
       edit(event);
     }
@@ -125,6 +124,7 @@ function bindEvents() {
     }
   });
 }
+
 function render() {
   var todos = getFilteredTodos();
   var todoList = document.getElementById('todo-list');
@@ -132,7 +132,8 @@ function render() {
   var toggleAll = document.getElementById('toggle-all');
   var newTodo = document.getElementById('new-todo');
 
-  // cleans todoList of todos with no 
+  // cleans todoList of todos with null parentId or isSubTask: false
+  checkTodoListForOrphans();
 
   // new elements for todo
   todoList.innerHTML = "";
@@ -196,7 +197,6 @@ function render() {
       todoList.append(newLi);
     } 
   });
-  
   main.style.display = todos.length > 0 ? 'inline' : 'none';
   toggleAll.checked = getActiveTodos().length === 0 ? true : false;
   renderFooter();
@@ -231,6 +231,12 @@ function renderFooter() {
   footer.innerHTML = template;
 }
 
+function checkTodoListForOrphans() {
+  // since it all gets re-rendered anyway, just focus on clean todos array
+  // 1. get a list element
+  // 2. 
+  console.log(todos);
+}
 
 function createsubtaskUI(e) {
   // Disables the + and x buttons while adding a subtask
@@ -257,7 +263,7 @@ function createsubtaskUI(e) {
 
 function createsubtask(e) {
   // createsubtask will find the nearest li and use data-id to id the parent
-  // TODO: can this be integrated into create?
+  // TODO: can this be integrated into create? 
   var parentVal = e.target.closest('li');
   var parentId = parentVal.getAttribute('data-id');
   var val = e.target.value.trim();
@@ -386,9 +392,7 @@ function indexFromEl(el) {
   }
 }
 function destroy(e) {
-  debugger;
   todos.splice(indexFromEl(e.target), 1);
-
   render();
 }
 

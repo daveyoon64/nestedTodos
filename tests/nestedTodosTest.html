@@ -1,11 +1,79 @@
 <script src="../simpletest.js"></script>
 <script src="../public/js/app.js"></script>
-<script>
 
+<!doctype html>
+<html lang="en" data-framework="jquery">
+	<head>
+		<meta charset="utf-8">
+		<title>TodoMVC</title>
+	</head>
+	<body>
+		<section id="todoapp">
+			<header id="header">
+				<h1>todos</h1>
+				<input id="new-todo" placeholder="What needs to be done?" autofocus>
+			</header>
+			<section id="main">
+				<input id="toggle-all" type="checkbox">
+				<label for="toggle-all">Mark all as complete</label>
+				<ul id="todo-list"></ul>
+			</section>
+			<footer id="footer"></footer>
+		</section>
+		<footer id="info">
+			<p>Double-click to edit a todo</p>
+		</footer>
+		<script src="../public/js/director.js"></script>
+		<script src="../public/js/app.js"></script>
+	</body>
+</html>
+
+
+<script>
 tests({
-  'test': function() {
+  'it should not plularize a string if there is only one': function() {
     var test = pluralize(1, 'rat');
     eq(test, 'rat');
+  },
+  'it should be able to add a todo': function() {
+    todos = [];
+    var dummyEvent = {
+      target: {
+        value: 'test robots',
+      },
+      which: 13,
+    }
+    create(dummyEvent);
+    eq(todos.length, 1);
+  },
+  'it should be able to create a subtask beneath a parent todo': function() {
+    todos = [];
+    var dummyEvent = {
+      target: {
+        value: 'test robots',
+        closest: 'dave',
+      },
+      which: 13,
+    }
+    var dummySubtaskEvent = {
+      target: {
+        value: 'test robots',
+      },
+      which: 13,
+    }
+    create(dummyEvent);
+    var testParent = todos[0].id;
+
+    dummySubtaskEvent.target.closest = function(e) { 
+        return {
+          getAttribute: function(id) {
+            return testParent;
+          }
+        };
+    };
+    dummySubtaskEvent.target.closest.getAttribute = function(e) { return testParent};
+    createsubtask(dummySubtaskEvent);
+    eq(todos[1].parent, todos[0].id);
   },
 });
 </script>
