@@ -57,23 +57,80 @@ tests({
     }
     var dummySubtaskEvent = {
       target: {
-        value: 'test robots',
+        value: 'ultra robots',
+        closest: function(e) {
+          return {
+            getAttribute: function(id) {
+              return testParent;
+            }
+          }
+        }
       },
       which: 13,
     }
     create(dummyEvent);
     var testParent = todos[0].id;
-
-    dummySubtaskEvent.target.closest = function(e) { 
-        return {
-          getAttribute: function(id) {
-            return testParent;
-          }
-        };
-    };
-    dummySubtaskEvent.target.closest.getAttribute = function(e) { return testParent};
     createsubtask(dummySubtaskEvent);
     eq(todos[1].parent, todos[0].id);
+  },
+  'it should be able to delete a todo': function() {
+    todos = [];
+    var dummyEvent = {
+      target: {
+        value: 'test robots',
+        closest: function(e) {
+          return {
+            dataset: {
+              id: testId,
+            }
+          }
+        }
+      },
+      which: 13,
+    }
+    create(dummyEvent);
+    var testId = todos[0].id;
+    destroy(dummyEvent);
+    eq(todos.length, 0);
+  },
+  'it should be able to remove any todos when its parent todo does not exist': function() {
+    todos = [];
+    var dummyEvent = {
+      target: {
+        value: 'test robots',
+        closest: function(e) {
+          return {
+            dataset: {
+              id: testParent,
+            }
+          }
+        }
+      },
+      which: 13,
+    }
+    var dummySubtaskEvent = {
+      target: {
+        value: 'ultra robots',
+        closest: function(e) {
+          return {
+            getAttribute: function(id) {
+              return testParent;
+            }
+          }
+        }
+      },
+      which: 13,
+    }
+    // create three tasks. task1 -> task2(child of 1) -> task3(child of 2)
+    create(dummyEvent);
+    var testParent = todos[0].id;
+    createsubtask(dummySubtaskEvent);
+    testParent = todos[1].id;
+    dummySubtaskEvent.target.value = 'ultra mega ribbits';
+    createsubtask(dummySubtaskEvent);
+    // delete task2, which should delete task2 and task3
+    destroy(dummyEvent);
+    eq(todos.length, 1);
   },
 });
 </script>

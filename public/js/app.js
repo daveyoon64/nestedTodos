@@ -17,7 +17,7 @@ var footerTemplateEl = document.getElementById('footer-template');
 //    2. Toggle the innermost child as complete
 //    3. Click on completed
 //    app.js:178 Uncaught TypeError: Cannot read property 'childNodes' of null
-// 3. Deleting a todo (besides parent) with a subtask will cause an error
+// 3. Deleting a todo (besides parent) with a subtask will cause an error SOLVED
 //    app.js:169 Uncaught TypeError: Cannot read property 'childNodes' of null at app.js:169
 //    if I refresh the page, it'll bring back all old entries
 //    - the problem:
@@ -34,7 +34,7 @@ var footerTemplateEl = document.getElementById('footer-template');
 // 
 function uuid() {
   /* jshint bitwise:false */
-  var i, random;
+  var i,  random;
   var uuid = '';
 
   for (i = 0; i < 32; i++) {
@@ -232,10 +232,32 @@ function renderFooter() {
 }
 
 function checkTodoListForOrphans() {
-  // since it all gets re-rendered anyway, just focus on clean todos array
-  // 1. get a list element
-  // 2. 
-  console.log(todos);
+  var isFound = false;
+  for (var i = 0; i < todos.length; i++) {
+    if (todos[i].parent !== null) {
+      var testParentId = todos[i].parent;
+      for (var j = 0; j < todos.length; j++) {
+        if (testParentId === todos[j].id) {
+          isFound = true;
+          continue;
+        }
+      }
+      // delete that motherfucker... but how
+      if (isFound === false) {
+        var eventToDelete = {
+          target: {
+            closest: function(e) {
+              return { dataset: { id: todos[i].id }}
+            }
+          },
+        }
+        destroy(eventToDelete);
+      }
+    } else {
+      continue;
+    }
+    isFound = false;
+  }
 }
 
 function createsubtaskUI(e) {
@@ -262,8 +284,6 @@ function createsubtaskUI(e) {
 }
 
 function createsubtask(e) {
-  // createsubtask will find the nearest li and use data-id to id the parent
-  // TODO: can this be integrated into create? 
   var parentVal = e.target.closest('li');
   var parentId = parentVal.getAttribute('data-id');
   var val = e.target.value.trim();
