@@ -132,5 +132,51 @@ tests({
     destroy(dummyEvent);
     eq(todos.length, 1);
   },
+  'if a task is marked as completed, all of its children should be marked as completed': function() {
+    todos = [];
+    var dummyEvent = {
+      target: {
+        value: 'test puppies',
+        closest: function(e) {
+          return {
+            dataset: {
+              id: testParent,
+            }
+          }
+        }
+      },
+      which: 13,
+    }
+    var dummySubtaskEvent = {
+      target: {
+        value: 'ultra pupperz',
+        closest: function(e) {
+          return {
+            getAttribute: function(id) {
+              return testParent;
+            }
+          }
+        }
+      },
+      which: 13,
+    }
+    // create three tasks. task1 -> task2(child of 1) -> task3(child of 2)
+    create(dummyEvent);
+    var testParent = todos[0].id;
+    createsubtask(dummySubtaskEvent);
+    testParent = todos[1].id;
+    dummySubtaskEvent.target.value = 'ultra mega daschund pups';
+    createsubtask(dummySubtaskEvent);
+    // set the parent todo's completed to true
+    todos[0].completed = true;
+    getCompletedTodos();
+    var completedCount = 0;
+    for (var i = 0; i < todos.length; i++) {
+      if (todos[i].completed === true) {
+        completedCount++;
+      }
+    }
+    eq(completedCount, 3);
+  },
 });
 </script>
