@@ -4,28 +4,16 @@ var ENTER_KEY = 13;
 var ESCAPE_KEY = 27;
 var filter = "";
 var todos = store('todos-jquery');
+var idToParentLookup = {};
 var todoTemplateEl = document.getElementById('todo-template');
 var footerTemplateEl = document.getElementById('footer-template');
 
 // Bugs I've found
 // 1. You can press the add subtask button indefinitely SOLVED
-// 2. Clicking a child to complete will not register in the "completed" filter
-//    - if parent todo, it only show the parent todo
-//    - this will also break the footer, highlighting
-//    1. Add two levels of subtasks
-//    2. Toggle the innermost child as complete
-//    3. Click on completed
-//    app.js:178 Uncaught TypeError: Cannot read property 'childNodes' of null
-//    - how I understand the problem is that the child tasks do not update there completed property
-//    - dave               <---- clicked as completed, all children should have completed as true
-//      -dave
-//        -dave
-//          -dave
-//    - Problem: the todos list is first filtered using getFilteredTodos... so I need to solve
-//      that as well as the child reflecting the completed property of it's parent
+// 2. Clicking a child to complete will not register in the "completed" filter SOLVED
 // 3. Deleting a todo (besides parent) with a subtask will cause an error SOLVED
 // 4. When I double-click to edit a todo, all child subtasks disappear
-
+// 5. When in edit mode, i can double-click again for another edit window
 //
 // utility functions
 // 
@@ -33,7 +21,7 @@ function uuid() {
   /* jshint bitwise:false */
   var i,  random;
   var uuid = '';
-
+  
   for (i = 0; i < 32; i++) {
     random = Math.random() * 16 | 0;
     if (i === 8 || i === 12 || i === 16 || i === 20) {
@@ -182,11 +170,18 @@ function render() {
     newEditInput.setAttribute("value", todo.title);
     newLi.append(newEditInput);
 
+    // add to the idToParentLookup object
+    idToParentLookup[todo.id] = todo.parent;
+
     // logic to choose where to add the subtask
     if (todo.isSubtask === true) {
       var el = document.querySelector(`[data-id="${todo.parent}"]`);
-      var subtaskUL = el.childNodes[0].childNodes[4];
-      subtaskUL.appendChild(newLi);
+      if (el !== null) {
+        var subtaskUL = el.childNodes[0].childNodes[4];
+        subtaskUL.appendChild(newLi);
+      } else {
+        todoList.append(newLi);
+      }
     } else {
       todoList.append(newLi);
     } 
@@ -254,33 +249,19 @@ function checkTodoListForOrphans() {
   }
 }
 
-function checkChildrenForCompleted() {
-  // loop through todos
-  //   if todo has a parent
-  //     assign parent's completed to todo's completed
-  for (var i = 0; i < todos.length; i++) {
+function checkChildrenForCompleted(start) {
+  // The start arg ensures that subtasks inherit correct completed property
+  // by starting after the dispatched event in toggle(e)
+  if (todos[start + 1] === undefined) { return; }
+  for (var i = start + 1; i < todos.length; i++) {
     var parentId = todos[i].parent;
-    // doesn't work, doesn't get actual parent's completed property
-    // var parentCompletedProp = todos[i].completed;
     
-    var parentCompletedProp = todos.filter(function(todo) {
+    // finds the todo, whose id matches the parentId
+    var foundParent = todos.filter(function(todo) {
       return todo.id === parentId;
     })
-
-    // TODO: START HERE SATURDAY
-    // SOMETHING IS WRONG HERE....
-    // MY initial thought of all completed property being a copy of it's parent
-    // doesn't quite make sense, in fact, if i select a subtask to be true, even if
-    // the parent is false, the subtask will be false, because of my assumption
-    console.log(parentCompletedProp);
-    // search todos for parentId
-    if (parentId !== null) {
-      for (var j = 0; j < todos.length; j++) {
-        if (todos[j].parent === parentId) {
-          // assign the parent's completed property to child
-          todos[j].completed = parentCompletedProp[0].completed;
-        }
-      }
+    if (foundParent) {
+      todos[i].completed = foundParent[0].completed;
     }
   }
 }
@@ -347,8 +328,6 @@ function getActiveTodos() {
   });
 }
 function getCompletedTodos() {
-  debugger;
-  checkChildrenForCompleted();
   return todos.filter(function (todo) {
     return todo.completed;
   });
@@ -357,7 +336,7 @@ function getFilteredTodos() {
   if (filter === 'active') {
     return getActiveTodos();
   }
-
+  
   if (filter === 'completed') {
     return getCompletedTodos();
   }
@@ -391,6 +370,7 @@ function create(e) {
 function toggle(e) {
   var i = indexFromEl(e.target);
   todos[i].completed = !todos[i].completed;
+  checkChildrenForCompleted(i);
   render();
 }
 function edit(e) {

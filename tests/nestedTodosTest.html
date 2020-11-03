@@ -1,7 +1,6 @@
 <script src="../simpletest.js"></script>
 <script src="../public/js/app.js"></script>
 
-<!doctype html>
 <html lang="en" data-framework="jquery">
 	<head>
 		<meta charset="utf-8">
@@ -28,33 +27,27 @@
 	</body>
 </html>
 
-
 <script>
+var dummyEvent = {
+    target: {
+      value: 'test robots',
+      closest: 'dave',
+    },
+    which: 13,
+  }
 tests({
   'it should not plularize a string if there is only one': function() {
     var test = pluralize(1, 'rat');
     eq(test, 'rat');
   },
   'it should be able to add a todo': function() {
-    todos = [];
-    var dummyEvent = {
-      target: {
-        value: 'test robots',
-      },
-      which: 13,
-    }
+    todos = []; 
     create(dummyEvent);
     eq(todos.length, 1);
   },
   'it should be able to create a subtask beneath a parent todo': function() {
     todos = [];
-    var dummyEvent = {
-      target: {
-        value: 'test robots',
-        closest: 'dave',
-      },
-      which: 13,
-    }
+    
     var dummySubtaskEvent = {
       target: {
         value: 'ultra robots',
@@ -68,6 +61,7 @@ tests({
       },
       which: 13,
     }
+    dummyEvent.target.value = 'crummy bot';
     create(dummyEvent);
     var testParent = todos[0].id;
     createsubtask(dummySubtaskEvent);
@@ -132,7 +126,7 @@ tests({
     destroy(dummyEvent);
     eq(todos.length, 1);
   },
-  'if a task is marked as completed, all of its children should be marked as completed': function() {
+  'if a task is marked as completed, it should mark all its children as completed': function() {
     todos = [];
     var dummyEvent = {
       target: {
@@ -169,7 +163,7 @@ tests({
     createsubtask(dummySubtaskEvent);
     // set the parent todo's completed to true
     todos[0].completed = true;
-    getCompletedTodos();
+    checkChildrenForCompleted(0);
     var completedCount = 0;
     for (var i = 0; i < todos.length; i++) {
       if (todos[i].completed === true) {
@@ -177,6 +171,52 @@ tests({
       }
     }
     eq(completedCount, 3);
+  },
+  'if a subtasktask is marked as completed, it should marks all of its children as complete': function() {
+    todos = [];
+    var dummyEvent = {
+      target: {
+        value: 'test puppies',
+        closest: function(e) {
+          return {
+            dataset: {
+              id: testParent,
+            }
+          }
+        }
+      },
+      which: 13,
+    }
+    var dummySubtaskEvent = {
+      target: {
+        value: 'ultra pupperz',
+        closest: function(e) {
+          return {
+            getAttribute: function(id) {
+              return testParent;
+            }
+          }
+        }
+      },
+      which: 13,
+    }
+    // create four tasks. task1 -> task2(child of 1) -> task3(child of 2)
+    create(dummyEvent);
+    var testParent = todos[0].id;
+    createsubtask(dummySubtaskEvent);
+    testParent = todos[1].id;
+    dummySubtaskEvent.target.value = 'ultra mega daschund pups';
+    createsubtask(dummySubtaskEvent);
+    // set the parent todo's completed to true
+    todos[1].completed = true;
+    checkChildrenForCompleted(1)
+    var completedCount = 0;
+    for (var i = 0; i < todos.length; i++) {
+      if (todos[i].completed === true) {
+        completedCount++;
+      }
+    }
+    eq(completedCount, 2);
   },
 });
 </script>
