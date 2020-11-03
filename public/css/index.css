@@ -22,12 +22,13 @@ button {
 }
 
 body {
+	box-sizing: border-box;
 	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	line-height: 1.4em;
 	background: #f5f5f5;
 	color: #4d4d4d;
 	min-width: 230px;
-	max-width: 550px;
+	max-width: 600px;
 	margin: 0 auto;
 	-webkit-font-smoothing: antialiased;
 	-moz-font-smoothing: antialiased;
@@ -45,6 +46,7 @@ input[type="checkbox"] {
 }
 
 #todoapp {
+	width: 100%;
 	background: #fff;
 	margin: 130px 0 40px 0;
 	position: relative;
@@ -85,6 +87,7 @@ input[type="checkbox"] {
 
 #new-todo,
 .edit {
+	box-sizing: border-box ;
 	position: relative;
 	margin: 0;
 	width: 100%;
@@ -98,10 +101,13 @@ input[type="checkbox"] {
 	padding: 6px;
 	border: 1px solid #999;
 	box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
-	box-sizing: border-box;
 	-webkit-font-smoothing: antialiased;
 	-moz-font-smoothing: antialiased;
-	font-smoothing: antialiased;
+	/* font-smoothing: antialiased; */
+}
+.edit {
+	width: 80%;
+	box-sizing: border-box;
 }
 
 #new-todo {
@@ -164,15 +170,19 @@ label[for='toggle-all'] {
 	padding: 0;
 }
 
-#todo-list li.editing .edit {
+#todo-list li.editing > .edit {
 	display: block;
-	width: 506px;
+	width: 90%;
 	padding: 13px 17px 12px 17px;
 	margin: 0 0 0 43px;
 }
 
 #todo-list li.editing .view {
-	display: none;
+	display: block;
+}
+
+.being-edited > *:not(.subtask) {
+	display: none !important;
 }
 
 #todo-list li .toggle {

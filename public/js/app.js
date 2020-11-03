@@ -127,6 +127,13 @@ function render() {
       newLi.removeAttribute("class", "");
     }
     newLi.setAttribute("data-id", todo.id);  
+
+    // new input for editing
+    var newEditInput = document.createElement('input');
+    newEditInput.setAttribute("class", "edit");
+    newEditInput.setAttribute("value", todo.title);
+    newLi.append(newEditInput);
+
     // create the new div and append it to the li
     var newDiv = document.createElement('div');
     newDiv.setAttribute("class", "view");
@@ -164,12 +171,6 @@ function render() {
     //newEditInput.setAttribute("value", todo.title);
     newDiv.append(newUl);
 
-    // new input for editing
-    var newEditInput = document.createElement('input');
-    newEditInput.setAttribute("class", "edit");
-    newEditInput.setAttribute("value", todo.title);
-    newLi.append(newEditInput);
-
     // add to the idToParentLookup object
     idToParentLookup[todo.id] = todo.parent;
 
@@ -177,7 +178,8 @@ function render() {
     if (todo.isSubtask === true) {
       var el = document.querySelector(`[data-id="${todo.parent}"]`);
       if (el !== null) {
-        var subtaskUL = el.childNodes[0].childNodes[4];
+        // line of shame...
+        var subtaskUL = el.childNodes[1].childNodes[4];
         subtaskUL.appendChild(newLi);
       } else {
         todoList.append(newLi);
@@ -216,7 +218,7 @@ function renderFooter() {
     ${completedTodos ? `<button id="clear-completed">Clear completed</button>` : ''}
   `;
   
-  footer.style.display = todoCount > 0 ? 'block' : 'none';
+  footer.style.display = todoCount > 0 ? 'block' : 'block';
   footer.innerHTML = template;
 }
 
@@ -374,8 +376,12 @@ function toggle(e) {
   render();
 }
 function edit(e) {
+  var parNode = e.target.parentNode;
   var el = e.target.closest('li');
+
+  parNode.classList.add('being-edited')
   el.classList.add('editing');
+
   var input = el.querySelector('.edit');
   input.focus();
 }
