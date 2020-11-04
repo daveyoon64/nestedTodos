@@ -8,12 +8,6 @@ var idToParentLookup = {};
 var todoTemplateEl = document.getElementById('todo-template');
 var footerTemplateEl = document.getElementById('footer-template');
 
-// Bugs I've found
-// 1. You can press the add subtask button indefinitely SOLVED
-// 2. Clicking a child to complete will not register in the "completed" filter SOLVED
-// 3. Deleting a todo (besides parent) with a subtask will cause an error SOLVED
-// 4. When I double-click to edit a todo, all child subtasks disappear
-// 5. When in edit mode, i can double-click again for another edit window
 //
 // utility functions
 // 
@@ -178,8 +172,10 @@ function render() {
     if (todo.isSubtask === true) {
       var el = document.querySelector(`[data-id="${todo.parent}"]`);
       if (el !== null) {
-        // line of shame...
-        var subtaskUL = el.childNodes[1].childNodes[4];
+        // select the child div.view
+        var childDiv = el.querySelector('div');
+        // select the child unordered list in div.view
+        var subtaskUL = childDiv.querySelector('ul');
         subtaskUL.appendChild(newLi);
       } else {
         todoList.append(newLi);
@@ -218,7 +214,7 @@ function renderFooter() {
     ${completedTodos ? `<button id="clear-completed">Clear completed</button>` : ''}
   `;
   
-  footer.style.display = todoCount > 0 ? 'block' : 'block';
+  footer.style.display = todoCount > 0 ? 'block' : 'none';
   footer.innerHTML = template;
 }
 
@@ -262,7 +258,7 @@ function checkChildrenForCompleted(start) {
     var foundParent = todos.filter(function(todo) {
       return todo.id === parentId;
     })
-    if (foundParent) {
+    if (foundParent.length > 0) {
       todos[i].completed = foundParent[0].completed;
     }
   }
