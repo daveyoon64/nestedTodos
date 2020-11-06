@@ -37,7 +37,6 @@ function pluralize(count, word) {
   return count === 1 ? word : word + 's';
 }
 
-// global Handlebars, Router
 //
 // App functions
 // 
