@@ -4,7 +4,6 @@ var ENTER_KEY = 13;
 var ESCAPE_KEY = 27;
 var filter = "";
 var todos = store('todos-jquery');
-var idToParentLookup = {};
 var todoTemplateEl = document.getElementById('todo-template');
 var footerTemplateEl = document.getElementById('footer-template');
 
@@ -44,13 +43,10 @@ function pluralize(count, word) {
 // 
 function init() {
   bindEvents();
-  new Router({
-    '/:filter': function (DOMfilter) {
-      filter = DOMfilter;
-      render();
-    }.bind(this)
-  }).init('/all');
+  window.location.hash = '/all';
+  render();
 }
+
 function bindEvents() {
   var newTodoEvent = document.getElementById('new-todo');
   var toggleAllEvent = document.getElementById('toggle-all');
@@ -102,6 +98,19 @@ function bindEvents() {
       createsubtaskUI(event);
     }
   });
+  footerEvent.addEventListener('click', function(event) {
+    if (event.target && event.target.getAttribute('href') === '#/all') {
+      window.location.hash = '/all';
+    } else if (event.target && event.target.getAttribute('href') === '#/active') {
+      window.location.hash = '/active';
+    } else if (event.target && event.target.getAttribute('href') === '#/completed') {
+      window.location.hash = '/completed';
+    }
+    render();
+  });
+  window.addEventListener('hashchange', function() {
+    render();
+  });
 }
 
 function render() {
@@ -149,9 +158,12 @@ function render() {
     newLabel.innerText = todo.title;
     newDiv.append(newLabel);
 
-    // new buttom for subtask
+    // new button for subtask
     var newSubtaskButton = document.createElement('button');
     newSubtaskButton.setAttribute("class", "createsubtask");
+    if (window.location.hash === '#/completed') {
+      newSubtaskButton.setAttribute("disabled", "true");
+    }
     newDiv.append(newSubtaskButton);
 
     // new button for destroy
@@ -164,9 +176,6 @@ function render() {
     newUl.setAttribute("class", "subtask");
     //newEditInput.setAttribute("value", todo.title);
     newDiv.append(newUl);
-
-    // add to the idToParentLookup object
-    idToParentLookup[todo.id] = todo.parent;
 
     // logic to choose where to add the subtask
     if (todo.isSubtask === true) {
@@ -198,24 +207,86 @@ function renderFooter() {
   var activeTodoWord = pluralize(activeTodoCount, 'item');
   var completedTodos = todoCount - activeTodoCount;
   
-  var template = `
-    <span id="todo-count"><strong>${activeTodoCount}</strong> ${activeTodoWord} left</span>
-    <ul id="filters">
-      <li>
-        ${checkFilter('all') ? `<a class="selected" href="#/all">All</a>` : `<a href="#/all">All</a>`}
-      </li>
-      <li>
-        ${checkFilter('active') ? `<a class="selected" href="#/active">Active</a>` : `<a href="#/active">Active</a>`}
-      </li>
-      <li>
-        ${checkFilter('completed') ? `<a class="selected" href="#/completed">Completed</a>` : `<a href="#/completed">Completed</a>`}
-      </li>
-    </ul>
-    ${completedTodos ? `<button id="clear-completed">Clear completed</button>` : ''}
-  `;
-  
+  footer.innerHTML = '';
+  // create new span
+  var newSpan = document.createElement('span');
+  newSpan.setAttribute("id", "todo-count");
+  var newStrong = document.createElement('strong');
+  var strongContent = document.createTextNode(`${activeTodoCount}`);
+  newStrong.appendChild(strongContent);
+  newSpan.appendChild(newStrong);
+  newSpan.textContent += ` ${activeTodoWord} left`;
+
+  // append span to footer
+  footer.appendChild(newSpan);
+
+  // create new ul for filters
+  var newUl = document.createElement('ul');
+  newUl.setAttribute("id", "filters");
+
+  // create new li for all
+  var newAllLi = document.createElement('li');
+  var newAllA = document.createElement('a');
+  if (window.location.hash === "#/all") {  
+    newAllA.setAttribute("class", "selected");
+  }
+  newAllA.setAttribute("href", "#/all");
+  newAllA.textContent = "All";
+  newAllLi.appendChild(newAllA);
+
+  // create new li for active
+  var newActiveLi = document.createElement('li');
+  var newActiveA = document.createElement('a');
+  if (window.location.hash === "#/active") {  
+    newActiveA.setAttribute("class", "selected");
+  }
+  newActiveA.setAttribute("href", "#/active");
+  newActiveA.textContent = "Active";
+  newActiveLi.appendChild(newActiveA);
+
+  // create new li for completed
+  var newCompletedLi = document.createElement('li');
+  var newCompletedA = document.createElement('a');
+  if (window.location.hash === "#/completed") {  
+    newCompletedA.setAttribute("class", "selected");
+  }
+  newCompletedA.setAttribute("href", "#/completed");
+  newCompletedA.textContent = "Completed";
+  newCompletedLi.appendChild(newCompletedA);
+
+  // finally, append these to the ul
+  newUl.append(newAllLi, newActiveLi, newCompletedLi);
+
+  // then append it to the footer
+  footer.append(newUl);
+
+  // if (completedTodos) {
+  //   var newButton = document.createElement('button');
+  //   newButton.setAttribute("id", "clear-completed");
+  //   newButton.textContent = "Clear completed";
+  // } else {
+  //   var buttonToDelete = document.getElementById("clear-completed");
+  //   buttonToDelete.remove();
+  // }
+
+  // conditionally create button based on completedTodos
+  // var template = `
+  //   <span id="todo-count"><strong>${activeTodoCount}</strong> ${activeTodoWord} left</span>
+  //   <ul id="filters">
+  //     <li>
+  //       ${checkFilter('all') ? `<a class="selected" href="#/all">All</a>` : `<a href="#/all">All</a>`}
+  //     </li>
+  //     <li>
+  //       ${checkFilter('active') ? `<a class="selected" href="#/active">Active</a>` : `<a href="#/active">Active</a>`}
+  //     </li>
+  //     <li>
+  //       ${checkFilter('completed') ? `<a class="selected" href="#/completed">Completed</a>` : `<a href="#/completed">Completed</a>`}
+  //     </li>
+  //   </ul>
+  //   ${completedTodos ? `<button id="clear-completed">Clear completed</button>` : ''}
+  // `;
   footer.style.display = todoCount > 0 ? 'block' : 'none';
-  footer.innerHTML = template;
+  //footer.innerHTML = template;
 }
 
 function checkTodoListForOrphans() {
@@ -297,7 +368,6 @@ function createsubtask(e) {
   if (e.which !== ENTER_KEY || !val) {
     return;
   }
-
   todos.push({
     id: uuid(),
     title: val,
@@ -330,12 +400,13 @@ function getCompletedTodos() {
     return todo.completed;
   });
 }
+
 function getFilteredTodos() {
-  if (filter === 'active') {
+  if (window.location.hash === '#/active') {
     return getActiveTodos();
   }
   
-  if (filter === 'completed') {
+  if (window.location.hash === '#/completed') {
     return getCompletedTodos();
   }
 

@@ -218,5 +218,60 @@ tests({
     }
     eq(completedCount, 2);
   },
+  'if a footer filter is selected, it should correctly select the todos with the selected filter': function() {
+    todos = [];
+    var runOnceCounter = 0;
+    var dummyEvent = {
+      target: {
+        value: 'test rhino',
+        closest: function(e) {
+          return {
+            dataset: {
+              id: testParent,
+            }
+          }
+        }
+      },
+      which: 13,
+    }
+    var dummySubtaskEvent = {
+      target: {
+        value: 'ultra rhinocerous',
+        closest: function(e) {
+          return {
+            getAttribute: function(id) {
+              return testParent;
+            }
+          }
+        }
+      },
+      which: 13,
+    }
+    // create two tasks. task1 -> task2(child of 1)
+    create(dummyEvent);
+    var testParent = todos[0].id;
+    createsubtask(dummySubtaskEvent);
+
+    // set the parent todo's completed to true
+    todos[1].completed = true;
+
+    // check all filter
+    window.location.hash = '/all';
+    var testTodo = getFilteredTodos();
+    eq(testTodo.length, 2);
+
+    // check active filter
+    window.location.hash = '/active';
+    testTodo = getFilteredTodos();
+    eq(testTodo.length, 1);
+    eq(testTodo[0].title, 'test rhino');
+    
+    // check completed filter
+    window.location.hash = '/completed';
+    testTodo = getFilteredTodos();
+    eq(testTodo.length, 1);
+    eq(testTodo[0].title, 'ultra rhinocerous');
+    
+  },
 });
 </script>
