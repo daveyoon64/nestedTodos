@@ -260,33 +260,13 @@ function renderFooter() {
   // then append it to the footer
   footer.append(newUl);
 
-  // if (completedTodos) {
-  //   var newButton = document.createElement('button');
-  //   newButton.setAttribute("id", "clear-completed");
-  //   newButton.textContent = "Clear completed";
-  // } else {
-  //   var buttonToDelete = document.getElementById("clear-completed");
-  //   buttonToDelete.remove();
-  // }
-
-  // conditionally create button based on completedTodos
-  // var template = `
-  //   <span id="todo-count"><strong>${activeTodoCount}</strong> ${activeTodoWord} left</span>
-  //   <ul id="filters">
-  //     <li>
-  //       ${checkFilter('all') ? `<a class="selected" href="#/all">All</a>` : `<a href="#/all">All</a>`}
-  //     </li>
-  //     <li>
-  //       ${checkFilter('active') ? `<a class="selected" href="#/active">Active</a>` : `<a href="#/active">Active</a>`}
-  //     </li>
-  //     <li>
-  //       ${checkFilter('completed') ? `<a class="selected" href="#/completed">Completed</a>` : `<a href="#/completed">Completed</a>`}
-  //     </li>
-  //   </ul>
-  //   ${completedTodos ? `<button id="clear-completed">Clear completed</button>` : ''}
-  // `;
+  if (completedTodos) {
+    var newButton = document.createElement('button');
+    newButton.setAttribute("id", "clear-completed");
+    newButton.textContent = "Clear completed";
+    footer.appendChild(newButton);
+  }
   footer.style.display = todoCount > 0 ? 'block' : 'none';
-  //footer.innerHTML = template;
 }
 
 function checkTodoListForOrphans() {
@@ -317,7 +297,6 @@ function checkTodoListForOrphans() {
     isFound = false;
   }
 }
-
 function checkChildrenForCompleted(start) {
   // The start arg ensures that subtasks inherit correct completed property
   // by starting after the dispatched event in toggle(e)
@@ -334,7 +313,6 @@ function checkChildrenForCompleted(start) {
     }
   }
 }
-
 function createsubtaskUI(e) {
   // Disables the + and x buttons while adding a subtask
   // They will get recreated after createsubtask() runs render()
@@ -346,10 +324,8 @@ function createsubtaskUI(e) {
   for (var i = 0; i < destroyButtonList.length; i++) {
     destroyButtonList[i].setAttribute("disabled", true);
   }
-
   // Creates the input box to enter your subtask
   var subtaskUl = e.target.parentNode.childNodes[4];
-
   // creating and configuring out subtask input field
   var newInput = document.createElement('input');
   newInput.innerText = 'new subtask info';
@@ -357,10 +333,10 @@ function createsubtaskUI(e) {
   newInput.setAttribute("placeholder", "enter subtask");
   subtaskUl.appendChild(newInput);
 }
-
 function createsubtask(e) {
   var parentVal = e.target.closest('li');
   var parentId = parentVal.getAttribute('data-id');
+  var parentCompleted = false;
   var val = e.target.value.trim();
 
   // If key other than ENTER is pressed, return
@@ -368,10 +344,16 @@ function createsubtask(e) {
   if (e.which !== ENTER_KEY || !val) {
     return;
   }
+  // ensure subtask inherits completed property from parent
+  for (var i = 0; i < todos.length; i++) {
+    if (todos[i].id === parentId) {
+      parentCompleted = todos[i].completed;
+    }
+  }
   todos.push({
     id: uuid(),
     title: val,
-    completed: false,
+    completed: parentCompleted,
     isSubtask: true,
     parent: parentId,
   });
@@ -379,7 +361,6 @@ function createsubtask(e) {
   e.target.value = '';
   render();
 }
-
 function checkFilter(testFilter) {
   return testFilter === filter;
 }
@@ -424,7 +405,6 @@ function create(e) {
   if (e.which !== ENTER_KEY || !val) {
     return;
   }
-
   todos.push({
     id: uuid(),
     title: val,

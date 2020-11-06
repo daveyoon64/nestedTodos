@@ -1,6 +1,3 @@
-<script src="../simpletest.js"></script>
-<script src="../public/js/app.js"></script>
-
 <html lang="en" data-framework="jquery">
 	<head>
 		<meta charset="utf-8">
@@ -21,20 +18,20 @@
 		</section>
 		<footer id="info">
 			<p>Double-click to edit a todo</p>
-		</footer>
-		<script src="../public/js/director.js"></script>
+    </footer>
+    <script src="../simpletest.js"></script>
 		<script src="../public/js/app.js"></script>
 	</body>
 </html>
 
 <script>
 var dummyEvent = {
-    target: {
-      value: 'test robots',
-      closest: 'dave',
-    },
-    which: 13,
-  }
+  target: {
+    value: 'test robots',
+    closest: 'dave',
+  },
+  which: 13,
+}
 tests({
   'it should not plularize a string if there is only one': function() {
     var test = pluralize(1, 'rat');
@@ -270,8 +267,7 @@ tests({
     window.location.hash = '/completed';
     testTodo = getFilteredTodos();
     eq(testTodo.length, 1);
-    eq(testTodo[0].title, 'ultra rhinocerous');
-    
+    eq(testTodo[0].title, 'ultra rhinocerous'); 
   },
 });
 </script>
